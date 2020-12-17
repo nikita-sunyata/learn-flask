@@ -1,4 +1,6 @@
 from flask import Flask
+from flask import request
+from flask import current_app
 app = Flask(__name__) # when this program is the main program , '__main__' is going to be the parameter
 
 #two way to route
@@ -15,7 +17,12 @@ def index():
 @app.route('/user/<name>')
 def user(name):
     return '<h1>Hello, {}</h1>'.format(name)
+    # return '<h1>{}</h1>'.format(request.values)
+    # return current_app.name
+    # return r'<h1>{}</h1>'.format(app.url_map)
+
 
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    print(app.url_map)
+    app.run(port=5000,debug=True)
