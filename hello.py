@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request
 from flask import current_app
+from flask import redirect
 app = Flask(__name__) # when this program is the main program , '__main__' is going to be the parameter
 
 #two way to route
@@ -21,8 +22,12 @@ def user(name):
     # return current_app.name
     # return r'<h1>{}</h1>'.format(app.url_map)
 
+@app.route('/google')
+def google():
+    return redirect('https://www.google.com')
+
 
 
 if __name__ == '__main__':
-    print(app.url_map)
+    # print(app.url_map)
     app.run(port=5000,debug=True)
