@@ -4,8 +4,10 @@ from flask import current_app
 from flask import redirect
 from flask import render_template
 from flask_bootstrap import Bootstrap
+from flask import url_for
 app = Flask(__name__) # when this program is the main program , '__main__' is going to be the parameter
 bootstrap = Bootstrap(app)
+
 #two way to route
 # first is using decorator
 @app.route('/')
@@ -39,5 +41,6 @@ def internal_server_error(e):
 
 
 if __name__ == '__main__':
-    # print(app.url_map)
+    print(app.url_map)
+    # print(url_for('static',filename='favicon.ico'))
     app.run(port=5000,debug=True)

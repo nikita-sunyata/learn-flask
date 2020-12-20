@@ -1,1 +1,18 @@
-<h1>Hello World!</h1>>
+{% extends "bootstrap/base.html"%}
+{% block head %}
+{{super()}}
+<link rel='shortcut icon' href="{{ url_for('static',filename='favicon.ico')}}">
+{% endblock %}
+{% block title %}
+Flasky
+{% endblock %}
+
+{% block navbar %}
+{{super()}}
+{% endblock %}
+
+{% block content %}
+{{super()}}
+<h1>Hello World!</h1>
+{% endblock %}
+
