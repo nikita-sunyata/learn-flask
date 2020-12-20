@@ -5,14 +5,16 @@ from flask import redirect
 from flask import render_template
 from flask_bootstrap import Bootstrap
 from flask import url_for
+from flask_moment import Moment
+from datetime import datetime
 app = Flask(__name__) # when this program is the main program , '__main__' is going to be the parameter
 bootstrap = Bootstrap(app)
-
+moment = Moment(app)
 #two way to route
 # first is using decorator
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html',current_time=datetime.utcnow())
     # return '<h1>Hello World</h1>'
 #second is using app.add_url_rule() function to do so
 # def index():
@@ -32,6 +34,8 @@ def google():
     return redirect('https://www.google.com')
 
 
+
+# error handle
 @app.errorhandler(404)
 def page_not_found(e):
 	return render_template('404.html'),404
