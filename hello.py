@@ -12,6 +12,7 @@ from wtforms import StringField , SubmitField
 from wtforms.validators import DataRequired
 from flask import session
 from flask import redirect
+from flask import flash
 
 class NameForm(FlaskForm):
     name = StringField('What is your name?',validators=[DataRequired()])
@@ -30,7 +31,10 @@ def index():
     # name = None
     form = NameForm() # create an instence of NameForm() class
     if form.validate_on_submit():
-        session['name'] = form.name.data
+        old_name = session.get('name') # check if there is an old session name
+        if (old_name is not None) and (old_name != form.name.data):
+            flash('Looks like you have changed your name !')
+        session['name'] = form.name.data # store the current name to session
         return redirect(url_for('index'))
     return render_template('index.html',current_time=datetime.utcnow(),form=form,name=session.get('name'))
     # return '<h1>Hello World</h1>'
