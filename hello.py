@@ -13,10 +13,16 @@ from wtforms.validators import DataRequired
 from flask import session
 from flask import redirect
 from flask import flash
+import os
+from flask_sqlalchemy import SQLAlchemy
 
 class NameForm(FlaskForm):
     name = StringField('What is your name?',validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+
+#set sqlite path
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 
@@ -24,6 +30,30 @@ app = Flask(__name__) # when this program is the main program , '__main__' is go
 app.config['SECRET_KEY'] = 'this is the secret key'
 bootstrap = Bootstrap(app)
 moment = Moment(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///" + os.path.join(basedir,'data.sqlite')
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
+#define db's tables
+class Role(db.Model):
+    __tablename__  = 'roles'
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(64),unique=True)
+    #add backref
+    users = db.relationship('User',backref='role')
+
+    def __repr__(self):
+        return '<Role {}>'.format(self.name)
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer,primary_key=True)
+    username = db.Column(db.String(64),unique=True,index=True)
+    role_id = db.Column(db.Integer,db.ForeignKey('roles.id'))
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
+
+
+
+
 #two way to route
 # first is using decorator
 @app.route('/',methods=['GET','POST'])
