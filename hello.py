@@ -16,6 +16,7 @@ from flask import flash
 import os
 from flask_sqlalchemy import SQLAlchemy
 
+#every class derived from FlaskForm will be a webform.
 class NameForm(FlaskForm):
     name = StringField('What is your name?',validators=[DataRequired()])
     submit = SubmitField('Submit')
@@ -39,10 +40,14 @@ class Role(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(64),unique=True)
     #add backref
-    users = db.relationship('User',backref='role')
-
+    users = db.relationship('User',backref='role',lazy='dynamic')
     def __repr__(self):
         return '<Role {}>'.format(self.name)
+    # def __init__(self,id,name,users):
+    #     self.id = id
+    #     self.name = name
+    #     self.users = users
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer,primary_key=True)
@@ -50,8 +55,14 @@ class User(db.Model):
     role_id = db.Column(db.Integer,db.ForeignKey('roles.id'))
     def __repr__(self):
         return '<User {}>'.format(self.username)
+    # def __init__(self,id,username,role_id):
+    #     self.id = id
+    #     self.username = username
+    #     self.role_id = role_id
 
-
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db,User=User,Role=Role)
 
 
 #two way to route
@@ -61,17 +72,24 @@ def index():
     # name = None
     form = NameForm() # create an instence of NameForm() class
     if form.validate_on_submit():
-        old_name = session.get('name') # check if there is an old session name
-        if (old_name is not None) and (old_name != form.name.data):
-            flash('Looks like you have changed your name !')
-        session['name'] = form.name.data # store the current name to session
+        #use the user input name to search database to see if the person is already in it.
+        user = User.query.filter_by(username=form.name.data).first()
+        if user is None:
+        #create new user row
+            user = User(username=form.name.data)
+            db.session.add(user)
+            db.session.commit()
+            # add a new pair data to our app session dictionary. (like cookies)
+            session['known']=False
+        else:
+            session['known']=True
+        # add another app session data , cuz we're redircting the page , we need to remember this value
+        session['name'] = form.name.data
         return redirect(url_for('index'))
-    return render_template('index.html',current_time=datetime.utcnow(),form=form,name=session.get('name'))
-    # return '<h1>Hello World</h1>'
-#second is using app.add_url_rule() function to do so
-# def index():
-#     return '<h1>Hello World</h1>'
-# app.add_url_rule('/','index',index)
+    return render_template('index.html',current_time=datetime.utcnow(),form=form,name=session.get('name'),known=session.get('known',False))
+
+
+
 
 @app.route('/user/<name>')
 def user(name):
